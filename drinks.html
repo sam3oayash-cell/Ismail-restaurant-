@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المشروبات</title>
+<style>
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana; text-align:center; background:linear-gradient(to bottom,#fefcea,#f1c40f); margin:0; }
+header { background:#e74c3c; color:white; padding:25px; box-shadow:0 4px 15px rgba(0,0,0,0.3);}
+header h1 { font-size:2em; margin-bottom:5px; }
+header p { font-size:1em; color:#fffbe6; }
+.story-container { display:flex; overflow-x:auto; gap:25px; padding:25px; scroll-snap-type:x mandatory; }
+.story { flex:0 0 250px; scroll-snap-align:start; background:white; border-radius:20px; box-shadow:0 6px 15px rgba(0,0,0,0.25); text-align:center; padding:20px; transition: transform 0.3s; }
+.story img { width:220px; height:150px; border-radius:15px; object-fit:cover; margin-bottom:10px;}
+.story:hover { transform:scale(1.07);}
+button { margin-top:10px; padding:12px 25px; background:#e74c3c; color:white; border:none; border-radius:15px; cursor:pointer; font-size:1em; transition:0.3s; }
+button:hover { background:#c0392b; }
+#cart { margin:20px auto; background:white; padding:20px; border-radius:20px; max-width:450px; box-shadow:0 4px 12px rgba(0,0,0,0.2);}
+a { display:block; margin-top:15px; color:#e74c3c; text-decoration:none; font-weight:bold;}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🥤 المشروبات</h1>
+<p>اضغط على الزر لإضافة المنتج للسلة</p>
+</header>
+
+<div class="story-container">
+  <div class="story">
+    <img src="drink1.jpg" alt="كينزا كولا">
+    <h3>كينزا كولا</h3>
+    <p>$3</p>
+    <button onclick="addToCart('كينزا كولا', 3)">أضف للسلة</button>
+  </div>
+
+  <div class="story">
+    <img src="drink2.jpg" alt="كينزا خضراء">
+    <h3>كينزا خضراء</h3>
+    <p>$3</p>
+    <button onclick="addToCart('كينزا خضراء', 3)">أضف للسلة</button>
+  </div>
+
+  <div class="story">
+    <img src="drink3.jpg" alt="عصير برتقال">
+    <h3>عصير برتقال</h3>
+    <p>$4</p>
+    <button onclick="addToCart('عصير برتقال', 4)">أضف للسلة</button>
+  </div>
+</div>
+
+<div id="cart">
+<h3>🛒 سلة الطلبات</h3>
+<ul id="cart-list"></ul>
+<p><strong>المجموع: $<span id="total">0</span></strong></p>
+<button onclick="sendOrder()">إرسال الطلب</button>
+<button onclick="clearCart()" style="background:#ccc;color:black;margin-left:10px;">🗑️ تفريغ السلة</button>
+<button onclick="removeItem()" style="background:#aaa;color:black;margin-left:10px;">❌ حذف صنف</button>
+<a href="ismael.html">⬅ الرجوع للرئيسية</a>
+</div>
+
+<script>
+// التحقق من الطاولة
+const table = localStorage.getItem('table');
+if(!table){
+  alert('يرجى العودة للصفحة الرئيسية واختيار الطاولة أولاً');
+  window.location.href = 'index.html';
+}
+
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
+let total = Number(localStorage.getItem('total')) || 0;
+
+function addToCart(name, price){
+  price = Number(price);
+  cart.push({name, price});
+  total += price;
+  updateCart();
+}
+
+function updateCart(){
+  localStorage.setItem('cart', JSON.stringify(cart));
+  localStorage.setItem('total', total);
+  const list = document.getElementById('cart-list');
+  list.innerHTML = '';
+  cart.forEach((item,index)=>{
+    const li = document.createElement('li');
+    li.textContent = `${item.name} - $${item.price}`;
+    li.setAttribute('data-index', index);
+    list.appendChild(li);
+  });
+  document.getElementById('total').textContent = total;
+}
+
+function sendOrder(){
+  if(cart.length === 0){ alert('السلة فارغة!'); return; }
+  const number = "96179130025";
+  let message = `طاولة رقم: ${table}\nوصلني طلب:\n`;
+  cart.forEach(item=>{ message += `${item.name} - $${item.price}\n`; });
+  message += `المجموع: $${total}`;
+  window.open(`https://wa.me/${number}?text=${encodeURIComponent(message)}`);
+  cart = []; total=0; localStorage.removeItem('cart'); localStorage.removeItem('total');
+  updateCart();
+}
+
+function clearCart(){
+  if(cart.length === 0){ alert('السلة فارغة بالفعل!'); return; }
+  if(confirm('هل تريد مسح كل السلة؟')) {
+    cart = []; total=0;
+    localStorage.removeItem('cart'); localStorage.removeItem('total');
+    updateCart();
+  }
+}
+
+function removeItem(){
+  if(cart.length === 0){ alert('السلة فارغة!'); return; }
+  const index = prompt('اكتب رقم الصنف الذي تريد حذفه (ابدأ من 1)');
+  const i = parseInt(index)-1;
+  if(i>=0 && i<cart.length){
+    total -= cart[i].price;
+    cart.splice(i,1);
+    updateCart();
+  } else {
+    alert('رقم غير صحيح');
+  }
+}
+
+updateCart();
+</script>
+
+</body>
+</html>
